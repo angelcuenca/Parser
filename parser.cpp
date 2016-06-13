@@ -16,7 +16,7 @@ fstream ficheroEntrada;
 class Lexico{
 
 public:
-
+	
 	bool continua;
 	bool noSiguienteCaracter;
 	bool contenido;
@@ -42,248 +42,247 @@ public:
 			switch( estado )
 			{
 				case 0:	if( c == '<' )
-								estado=3;
-							else if( (c >= 33 && c <= 126) )
-								sigEstado(1);
-							else if( c == ' ' || c == '\n' || c == '\t' )
-								estado=0;
-							else if( ficheroEntrada.eof() )
-								continua=false;
+							estado=3;
+						else if( (c >= 33 && c <= 126) )
+							sigEstado(1);
+						else if( c == ' ' || c == '\n' || c == '\t' )
+							estado=0;
+						else if( ficheroEntrada.eof() )
+							continua=false;
 						/*	else
-							{
-								estadoAceptacion(0);
-								noSiguienteCaracter=true;
-							} */
-							break;
+						{
+							estadoAceptacion(0);
+							noSiguienteCaracter=true;
+						} */
+						break;
 
-							//Contenido entre las etiquetas <> </>
+				//Contenido entre las etiquetas <> </>
 				case 1:  while( c != '<' && !ficheroEntrada.eof() )
+						{
+							sigEstado(1);
+							c=aperturaArchivo();
+	
+							if( c == '<' )
 							{
-								sigEstado(1);
-								c=aperturaArchivo();
-
-
-								if( c == '<' )
-								{
-									contenido=true;
-									noSiguienteCaracter=true;
-								}
-
+								contenido=true;
+								noSiguienteCaracter=true;
 							}
-
-							if( contenido == true )
-							{
-								estadoAceptacion(1);
-							}
-							else
-							{
-								estadoAceptacion(0);
-							}
-							break;
+	
+						}
+	
+						if( contenido == true )
+						{
+							estadoAceptacion(1);
+						}
+						else
+						{
+							estadoAceptacion(0);
+						}
+						break;
 
 				case 3:	if( c == ' ' || c == '\t' )
-							{
-								estado=3;
-							}
-							else if( (c >= 65 && c <= 90) || (c >= 97 && c <= 122 ) )
-								sigEstado(4);
-							else if( c == '/' )
-								estado=5;
-							else
-							{
-								estadoAceptacion(0);
-							}
-							break;
+						{
+							estado=3;
+						}
+						else if( (c >= 65 && c <= 90) || (c >= 97 && c <= 122 ) )
+							sigEstado(4);
+						else if( c == '/' )
+							estado=5;
+						else
+						{
+							estadoAceptacion(0);
+						}
+						break;
 
-							//Estados etiqueta apertura
+				//Estados etiqueta apertura
 				case 4:	if( (c >= 65 && c <= 90) || (c >= 97 && c <= 122 ) )
-								sigEstado(4);
-							else if( c == ' ' || c == '\t' )
+							sigEstado(4);
+						else if( c == ' ' || c == '\t' )
+						{
+							tipo=revisaEtiqueta();
+							if( tipo == 4 )
 							{
-								tipo=revisaEtiqueta();
-								if( tipo == 4 )
+								bool fin;
+								while( c != '>' && !ficheroEntrada.eof() )
 								{
-									bool fin;
-									while( c != '>' && !ficheroEntrada.eof() )
-									{
-										c=aperturaArchivo();
-
-										if( c == '>' )
-											fin=true;
-									}
-
-									if( fin == true )
-										estadoAceptacion( tipo );
-									else
-										estadoAceptacion(0);
+									c=aperturaArchivo();
+		
+									if( c == '>' )
+										fin=true;
 								}
-								else if( tipo == 5 || tipo == 6 || tipo == 7 ||
-											tipo == 8 || tipo == 9 )
+		
+								if( fin == true )
+									estadoAceptacion( tipo );
+								else
+									estadoAceptacion(0);
+							}
+							else if( tipo == 5 || tipo == 6 || tipo == 7 ||
+										tipo == 8 || tipo == 9 )
+							{
+								bool fin;
+								while( c != '>' && !ficheroEntrada.eof() )
 								{
-									bool fin;
-									while( c != '>' && !ficheroEntrada.eof() )
+									c=aperturaArchivo();
+		
+									if( c == '>' )
+										fin=true;
+									else if( c != ' ' && c != '\t' )
 									{
-										c=aperturaArchivo();
-
-										if( c == '>' )
-											fin=true;
-										else if( c != ' ' && c != '\t' )
-										{
-											c='>';
-											fin=false;
-										}
-
+										c='>';
+										fin=false;
 									}
-
-									if( fin == true )
-									{
-										estadoAceptacion( tipo );
-									}
-									else
-										estadoAceptacion(0);
+		
+								}
+		
+								if( fin == true )
+								{
+									estadoAceptacion( tipo );
 								}
 								else
-								{
 									estadoAceptacion(0);
-								}
-							}
-							else if( c == '>' )
-							{
-								tipo=revisaEtiqueta();
-								if( tipo == 4 )
-								{
-									estadoAceptacion( tipo );
-								}
-								else if( tipo == 5 || tipo == 6 || tipo == 7 ||
-											tipo == 8 || tipo == 9 )
-								{
-									estadoAceptacion( tipo );
-								}
-
 							}
 							else
 							{
 								estadoAceptacion(0);
 							}
-							break;
+						}
+						else if( c == '>' )
+						{
+							tipo=revisaEtiqueta();
+							if( tipo == 4 )
+							{
+								estadoAceptacion( tipo );
+							}
+							else if( tipo == 5 || tipo == 6 || tipo == 7 ||
+										tipo == 8 || tipo == 9 )
+							{
+								estadoAceptacion( tipo );
+							}
+		
+						}
+						else
+						{
+							estadoAceptacion(0);
+						}
+						break;
 
 
 				case 5:	if( c == ' ' || c == '\t' )
-							{
-								estado=5;
-							}
-							else if( (c >= 65 && c <= 90) || (c >= 97 && c <= 122 ) )
-								sigEstado(6);
-							else
-							{
-								estadoAceptacion(0);
-							}
-							break;
+						{
+							estado=5;
+						}
+						else if( (c >= 65 && c <= 90) || (c >= 97 && c <= 122 ) )
+							sigEstado(6);
+						else
+						{
+							estadoAceptacion(0);
+						}
+						break;
 
 							//Estados etiqueta cerradura
 				case 6:	if( (c >= 65 && c <= 90) || (c >= 97 && c <= 122 ) )
-								sigEstado(6);
-							else if( c == ' ' || c == '\t' )
+							sigEstado(6);
+						else if( c == ' ' || c == '\t' )
+						{
+							tipo=revisaEtiqueta();
+							if( tipo == 4 )
 							{
-								tipo=revisaEtiqueta();
-								if( tipo == 4 )
+								bool fin;
+								while( c != '>' && !ficheroEntrada.eof() )
 								{
-									bool fin;
-									while( c != '>' && !ficheroEntrada.eof() )
+									c=aperturaArchivo();
+
+									if( c == '>' )
+										fin=true;
+									else if( c != ' ' && c != '\t' )
 									{
-										c=aperturaArchivo();
-
-										if( c == '>' )
-											fin=true;
-										else if( c != ' ' && c != '\t' )
-										{
-											c='>';
-											fin=false;
-										}
-
+										c='>';
+										fin=false;
 									}
 
-									if( fin == true )
-										estadoAceptacion( 10 );
-									else
-										estadoAceptacion(0);
 								}
-								else if( tipo == 5 || tipo == 6 || tipo == 7 ||
-											tipo == 8 || tipo == 9 )
-								{
-									bool fin;
-									while( c != '>' && !ficheroEntrada.eof() )
-									{
-										c=aperturaArchivo();
 
-										if( c == '>' )
-											fin=true;
-										else if( c != ' ' && c != '\t' )
-										{
-											c='>';
-											fin=false;
-										}
-
-									}
-
-									if( fin == true )
-									{
-										switch( tipo )
-										{
-											case 5:  estadoAceptacion( 11 );
-														break;
-											case 6:	estadoAceptacion( 12 );
-														break;
-											case 7:  estadoAceptacion( 13 );
-														break;
-											case 8: 	estadoAceptacion( 15 );
-														break;
-											case 9: 	estadoAceptacion( 14 );
-														break;
-										}
-									}
-									else
-										estadoAceptacion(0);
-								}
-								else
-								{
-									estadoAceptacion(0);
-								}
-							}
-							else if( c == '>' )
-							{
-								tipo=revisaEtiqueta();
-								if( tipo == 4 )
-								{
+								if( fin == true )
 									estadoAceptacion( 10 );
-								}
-								else if( tipo == 5 || tipo == 6 || tipo == 7 ||
-											tipo == 8 || tipo == 9 )
+								else
+									estadoAceptacion(0);
+							}
+							else if( tipo == 5 || tipo == 6 || tipo == 7 ||
+										tipo == 8 || tipo == 9 )
+							{
+								bool fin;
+								while( c != '>' && !ficheroEntrada.eof() )
 								{
-										switch( tipo )
-										{
-											case 5:  estadoAceptacion( 11 );
-														break;
-											case 6:	estadoAceptacion( 12 );
-														break;
-											case 7:  estadoAceptacion( 13 );
-														break;
-											case 8: 	estadoAceptacion( 15 );
-														break;
-											case 9: 	estadoAceptacion( 14 );
-														break;
-										}
+									c=aperturaArchivo();
+
+									if( c == '>' )
+										fin=true;
+									else if( c != ' ' && c != '\t' )
+									{
+										c='>';
+										fin=false;
+									}
+
+								}
+
+								if( fin == true )
+								{
+									switch( tipo )
+									{
+										case 5:  estadoAceptacion( 11 );
+													break;
+										case 6:	estadoAceptacion( 12 );
+													break;
+										case 7:  estadoAceptacion( 13 );
+													break;
+										case 8: 	estadoAceptacion( 15 );
+													break;
+										case 9: 	estadoAceptacion( 14 );
+													break;
+									}
 								}
 								else
-								{
 									estadoAceptacion(0);
-								}
 							}
 							else
 							{
 								estadoAceptacion(0);
 							}
-							break;
+						}
+						else if( c == '>' )
+						{
+							tipo=revisaEtiqueta();
+							if( tipo == 4 )
+							{
+								estadoAceptacion( 10 );
+							}
+							else if( tipo == 5 || tipo == 6 || tipo == 7 ||
+										tipo == 8 || tipo == 9 )
+							{
+									switch( tipo )
+									{
+										case 5:  estadoAceptacion( 11 );
+													break;
+										case 6:	estadoAceptacion( 12 );
+													break;
+										case 7:  estadoAceptacion( 13 );
+													break;
+										case 8: 	estadoAceptacion( 15 );
+													break;
+										case 9: 	estadoAceptacion( 14 );
+													break;
+									}
+							}
+							else
+							{
+								estadoAceptacion(0);
+							}
+						}
+						else
+						{
+							estadoAceptacion(0);
+						}
+						break;
 
 			} //fin switch
 
