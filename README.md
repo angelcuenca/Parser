@@ -1,3 +1,4 @@
 # Parser
-Parser analysis using RSS files
-Done with C++
+Parser analysis using RSS structure.
+Lexical and semantic analysis.
+
