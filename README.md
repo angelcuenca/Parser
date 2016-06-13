@@ -1,2 +1,3 @@
 # Parser
-Parser RSS Files
+Parser analysis using RSS files
+Done with C++
