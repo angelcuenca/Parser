@@ -1,4 +1,4 @@
 # Parser
-Parser analysis using RSS structure.
-Lexical and semantic analysis.
+Analisys from lexical and semantic XML structure. <br />
 
+Created in C language.
